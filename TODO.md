@@ -5,8 +5,6 @@
 
 ## Features
 <!-- - [ ] Example: Add Portuguese as a third language pair -->
+[ ] dont use TTS for the word in the users own language, when the word is guessed
 
 ## Done
-- [x] Add Dutch ↔ German language pair
-- [x] Enter key triggers "show more cards" on completion screen
-- [x] Rename project to foreign-language-practice
