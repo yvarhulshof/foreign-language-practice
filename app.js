@@ -461,7 +461,7 @@ function renderCard() {
   document.getElementById('answer-input').value = '';
   document.getElementById('answer-input').focus();
 
-  speak(frontWord, cfg.frontLang);
+  if (cfg.front !== 'dutch') speak(frontWord, cfg.frontLang);
 }
 
 function submitAnswer() {
@@ -518,8 +518,8 @@ function submitAnswer() {
   document.getElementById('next-row').classList.remove('hidden');
   setTimeout(() => document.getElementById('btn-next').focus(), 0);
 
-  // Speak the correct answer
-  speak(correctWord, cfg.backLang);
+  // Speak the correct answer (only for non-Dutch words — user's own language needs no audio)
+  if (cfg.back !== 'dutch') speak(correctWord, cfg.backLang);
 }
 
 function nextCard() {
