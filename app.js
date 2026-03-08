@@ -461,6 +461,7 @@ function renderCard() {
   document.getElementById('answer-input').value = '';
   document.getElementById('answer-input').focus();
 
+  speak(frontWord, cfg.frontLang);
 }
 
 function submitAnswer() {
@@ -517,8 +518,7 @@ function submitAnswer() {
   document.getElementById('next-row').classList.remove('hidden');
   setTimeout(() => document.getElementById('btn-next').focus(), 0);
 
-  // Speak the correct answer (the "to" language — always the target being learned)
-  speak(correctWord, cfg.backLang);
+  // No auto-speak on flip — question word was already spoken on card render
 }
 
 function nextCard() {
