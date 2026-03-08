@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vocab Trainer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ── Navigation bar ───────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-brand" id="nav-home">
+      <span class="nav-flag" data-i18n="navFlag">🇳🇱</span>
+      <span class="nav-title" data-i18n="navBrand">Nederlands Leren</span>
+    </div>
+    <div class="mode-toggle" id="modeToggle">
+      <button class="mode-btn active" data-mode="nl-ca">NL → CA</button>
+      <button class="mode-btn"        data-mode="ca-nl">CA → NL</button>
+      <button class="mode-btn"        data-mode="nl-de">NL → DE</button>
+      <button class="mode-btn"        data-mode="de-nl">DE → NL</button>
+    </div>
+    <button class="nav-link" id="nav-stats" aria-label="Estadístiques">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+      <span data-i18n="statsNav">Estadístiques</span>
+    </button>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: Home                                                     -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="view" id="view-home">
+    <div class="home-hero">
+      <div class="hero-flag" data-i18n="heroFlag">🇳🇱</div>
+      <h1 class="hero-title" data-i18n="heroTitle">Aprèn Neerlandès</h1>
+      <p class="hero-sub" data-i18n="heroSubtitle">Targetes de memòria amb repetició espaïada</p>
+    </div>
+
+    <div class="home-card">
+      <!-- Level selector -->
+      <div class="section-label" data-i18n="cefrLabel">Nivell CEFR</div>
+      <div class="level-selector">
+        <button class="level-btn active" data-level="A1">
+          <span class="level-code">A1</span>
+          <span class="level-desc" data-i18n="levelA1Sub">Principiant</span>
+        </button>
+        <button class="level-btn" data-level="A2">
+          <span class="level-code">A2</span>
+          <span class="level-desc" data-i18n="levelA2Sub">Bàsic</span>
+        </button>
+        <button class="level-btn" data-level="B1">
+          <span class="level-code">B1</span>
+          <span class="level-desc" data-i18n="levelB1Sub">Intermedi</span>
+        </button>
+        <button class="level-btn" data-level="B2">
+          <span class="level-code">B2</span>
+          <span class="level-desc" data-i18n="levelB2Sub">Intermedi avançat</span>
+        </button>
+        <button class="level-btn" data-level="C1">
+          <span class="level-code">C1</span>
+          <span class="level-desc" data-i18n="levelC1Sub">Avançat</span>
+        </button>
+      </div>
+
+      <!-- Today's summary -->
+      <div class="today-summary">
+        <div class="summary-item">
+          <span class="summary-number" id="home-due">–</span>
+          <span class="summary-label" data-i18n="statDue">Per repassar</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-item">
+          <span class="summary-number" id="home-new">–</span>
+          <span class="summary-label" data-i18n="statNew">Noves</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-item">
+          <span class="summary-number" id="home-streak">–</span>
+          <span class="summary-label" data-i18n="statStreak">Dies de ratxa</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btn-start" data-i18n="startBtn">Comença a practicar</button>
+    </div>
+
+    <p class="home-tip" data-i18n="homeTip">
+      💡 <strong>Com funciona:</strong> Veuràs la paraula en neerlandès. Escriu la traducció
+      i comprova la resposta. L'app programa la pròxima revisió automàticament.
+    </p>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: Study                                                    -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="view hidden" id="view-study">
+
+    <!-- Progress bar -->
+    <div class="study-header">
+      <button class="btn-ghost btn-back" id="nav-home-study" data-i18n="backBtn">← Inici</button>
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-bar-fill"></div>
+        </div>
+        <span class="progress-text" id="progress-text">0 / 0</span>
+      </div>
+    </div>
+
+    <!-- Flashcard -->
+    <div class="card-scene" id="card-scene">
+      <div class="card-inner" id="card-inner">
+
+        <!-- Front: question word + answer input -->
+        <div class="card-face card-front">
+          <div class="card-topic-badge" id="card-topic"></div>
+          <div class="card-main-word" id="card-front-word"></div>
+          <button class="btn-speak" id="btn-speak" aria-label="Escolta la pronunciació">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+          </button>
+          <div class="answer-input-row">
+            <input type="text" id="answer-input"
+                   data-i18n-placeholder="inputPlaceholder"
+                   placeholder="Escriu la traducció…"
+                   autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
+            <button class="btn-check" id="btn-check" data-i18n="checkBtn">→</button>
+          </div>
+        </div>
+
+        <!-- Back: result -->
+        <div class="card-face card-back">
+          <div class="result-feedback" id="result-feedback"></div>
+          <div class="card-catalan-word" id="card-back-word"></div>
+          <div class="result-user-answer hidden" id="result-user-answer"></div>
+          <div class="card-example hidden" id="card-example"></div>
+          <div class="card-example-translation hidden" id="card-example-translation"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Next button (shown after answer) -->
+    <div class="next-row hidden" id="next-row">
+      <button class="btn-primary btn-next" id="btn-next" data-i18n="nextBtn">Següent →</button>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: Stats                                                    -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="view hidden" id="view-stats">
+    <h2 class="stats-title" data-i18n="statsTitle">Les teves estadístiques</h2>
+
+    <div class="stats-overview">
+      <div class="stat-card">
+        <div class="stat-number" id="stats-streak">0</div>
+        <div class="stat-desc" data-i18n="statsStreak">Dies de ratxa</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stats-reviewed">0</div>
+        <div class="stat-desc" data-i18n="statsReviewed">Targetes repassades</div>
+      </div>
+    </div>
+
+    <div class="stats-levels">
+      <!-- A1 -->
+      <div class="level-stats-card">
+        <div class="level-stats-header">
+          <span class="level-badge">A1</span>
+          <span class="level-stats-name" data-i18n="statsA1Name">Principiant</span>
+          <span class="level-stats-total">(<span id="stats-a1-total">0</span> <span data-i18n="statsCards">targetes</span>)</span>
+        </div>
+        <div class="level-stats-row">
+          <div class="level-stat-item new">
+            <span id="stats-a1-new">0</span>
+            <span data-i18n="statsNew">Noves</span>
+          </div>
+          <div class="level-stat-item learning">
+            <span id="stats-a1-learning">0</span>
+            <span data-i18n="statsLearning">Aprenent</span>
+          </div>
+          <div class="level-stat-item mastered">
+            <span id="stats-a1-mastered">0</span>
+            <span data-i18n="statsMastered">Apreses</span>
+          </div>
+        </div>
+        <div class="level-progress-bar">
+          <div class="level-progress-fill" id="stats-a1-bar"></div>
+        </div>
+      </div>
+
+      <!-- A2 -->
+      <div class="level-stats-card">
+        <div class="level-stats-header">
+          <span class="level-badge">A2</span>
+          <span class="level-stats-name" data-i18n="statsA2Name">Bàsic</span>
+          <span class="level-stats-total">(<span id="stats-a2-total">0</span> <span data-i18n="statsCards">targetes</span>)</span>
+        </div>
+        <div class="level-stats-row">
+          <div class="level-stat-item new">
+            <span id="stats-a2-new">0</span>
+            <span data-i18n="statsNew">Noves</span>
+          </div>
+          <div class="level-stat-item learning">
+            <span id="stats-a2-learning">0</span>
+            <span data-i18n="statsLearning">Aprenent</span>
+          </div>
+          <div class="level-stat-item mastered">
+            <span id="stats-a2-mastered">0</span>
+            <span data-i18n="statsMastered">Apreses</span>
+          </div>
+        </div>
+        <div class="level-progress-bar">
+          <div class="level-progress-fill" id="stats-a2-bar"></div>
+        </div>
+      </div>
+
+      <!-- B1 -->
+      <div class="level-stats-card">
+        <div class="level-stats-header">
+          <span class="level-badge">B1</span>
+          <span class="level-stats-name" data-i18n="statsB1Name">Intermedi</span>
+          <span class="level-stats-total">(<span id="stats-b1-total">0</span> <span data-i18n="statsCards">targetes</span>)</span>
+        </div>
+        <div class="level-stats-row">
+          <div class="level-stat-item new">
+            <span id="stats-b1-new">0</span>
+            <span data-i18n="statsNew">Noves</span>
+          </div>
+          <div class="level-stat-item learning">
+            <span id="stats-b1-learning">0</span>
+            <span data-i18n="statsLearning">Aprenent</span>
+          </div>
+          <div class="level-stat-item mastered">
+            <span id="stats-b1-mastered">0</span>
+            <span data-i18n="statsMastered">Apreses</span>
+          </div>
+        </div>
+        <div class="level-progress-bar">
+          <div class="level-progress-fill" id="stats-b1-bar"></div>
+        </div>
+      </div>
+
+      <!-- B2 -->
+      <div class="level-stats-card">
+        <div class="level-stats-header">
+          <span class="level-badge">B2</span>
+          <span class="level-stats-name" data-i18n="statsB2Name">Intermedi avançat</span>
+          <span class="level-stats-total">(<span id="stats-b2-total">0</span> <span data-i18n="statsCards">targetes</span>)</span>
+        </div>
+        <div class="level-stats-row">
+          <div class="level-stat-item new">
+            <span id="stats-b2-new">0</span>
+            <span data-i18n="statsNew">Noves</span>
+          </div>
+          <div class="level-stat-item learning">
+            <span id="stats-b2-learning">0</span>
+            <span data-i18n="statsLearning">Aprenent</span>
+          </div>
+          <div class="level-stat-item mastered">
+            <span id="stats-b2-mastered">0</span>
+            <span data-i18n="statsMastered">Apreses</span>
+          </div>
+        </div>
+        <div class="level-progress-bar">
+          <div class="level-progress-fill" id="stats-b2-bar"></div>
+        </div>
+      </div>
+
+      <!-- C1 -->
+      <div class="level-stats-card">
+        <div class="level-stats-header">
+          <span class="level-badge">C1</span>
+          <span class="level-stats-name" data-i18n="statsC1Name">Avançat</span>
+          <span class="level-stats-total">(<span id="stats-c1-total">0</span> <span data-i18n="statsCards">targetes</span>)</span>
+        </div>
+        <div class="level-stats-row">
+          <div class="level-stat-item new">
+            <span id="stats-c1-new">0</span>
+            <span data-i18n="statsNew">Noves</span>
+          </div>
+          <div class="level-stat-item learning">
+            <span id="stats-c1-learning">0</span>
+            <span data-i18n="statsLearning">Aprenent</span>
+          </div>
+          <div class="level-stat-item mastered">
+            <span id="stats-c1-mastered">0</span>
+            <span data-i18n="statsMastered">Apreses</span>
+          </div>
+        </div>
+        <div class="level-progress-bar">
+          <div class="level-progress-fill" id="stats-c1-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-stats-practice" data-i18n="practiceBtn">Practica ara</button>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- Session completion overlay                                     -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="overlay hidden" id="completion-overlay">
+    <div class="overlay-card">
+      <div class="overlay-icon">🎉</div>
+      <p class="overlay-msg" id="completion-msg"></p>
+      <div class="overlay-actions">
+        <button class="btn-primary"   id="btn-continue-study" data-i18n="moreCards">Més targetes</button>
+        <button class="btn-secondary" id="btn-go-home"        data-i18n="homeBtn">Inici</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
