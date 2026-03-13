@@ -453,6 +453,7 @@ function renderCard() {
   document.getElementById('card-example-translation').classList.add('hidden');
 
   // Reset UI
+  document.getElementById('view-study').scrollTop = 0;
   document.getElementById('card-inner').classList.remove('flipped');
   document.getElementById('next-row').classList.add('hidden');
   document.getElementById('result-feedback').textContent = '';
@@ -514,6 +515,7 @@ function submitAnswer() {
 
   // Flip card and show Next button; defer focus so the keyup from the submit
   // Enter doesn't immediately trigger a click on btn-next in some browsers.
+  document.getElementById('view-study').scrollTop = 0;
   document.getElementById('card-inner').classList.add('flipped');
   document.getElementById('next-row').classList.remove('hidden');
   setTimeout(() => document.getElementById('btn-next').focus(), 0);
