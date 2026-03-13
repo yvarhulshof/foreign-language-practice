@@ -557,10 +557,37 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .overlay-actions { display: flex; flex-direction: column; gap: 12px; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  /* Navbar: wrap mode-toggle to second row */
+  .navbar {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    gap: 6px;
+  }
+  .nav-brand { order: 1; }
+  .nav-link  { order: 2; }
+  .mode-toggle {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+
+  /* Level selector: 3-column grid so labels don't overflow */
+  .level-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  /* View padding */
+  .view { padding: 20px 16px 40px; }
+}
+
 @media (max-width: 480px) {
   .card-main-word    { font-size: 1.9rem; }
   .card-catalan-word { font-size: 1.6rem; }
   .btn-next          { min-width: 140px; }
-  .level-selector    { gap: 8px; }
   .stats-overview    { grid-template-columns: 1fr 1fr; gap: 10px; }
 }
