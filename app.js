@@ -4,6 +4,7 @@
 const STORAGE_PROGRESS = 'dc_progress';
 const STORAGE_STATS    = 'dc_stats';
 const STORAGE_MODE     = 'dc_mode';
+const STORAGE_SKIPPED  = 'dc_skipped';
 const NEW_CARDS_PER_SESSION = 10;
 
 // ── Language pair config ────────────────────────────────────────────────────
@@ -60,6 +61,7 @@ const UI_STRINGS = {
     practiceBtn:      'Practica ara',
     moreCards:        'Més targetes',
     homeBtn:          'Inici',
+    skipBtn:          'Ja la sé — omet',
     completionDone:    (streak) => `Sessió completada! Ratxa: ${streak} dia${streak !== 1 ? 's' : ''}. Bon treball!`,
     completionNothing: 'No hi ha targetes pendents per avui! Torna demà. 🎉',
   },
@@ -104,6 +106,7 @@ const UI_STRINGS = {
     practiceBtn:      'Oefen nu',
     moreCards:        'Meer kaartjes',
     homeBtn:          'Begin',
+    skipBtn:          'Al bekend — overslaan',
     completionDone:    (streak) => `Sessie voltooid! Reeks: ${streak} dag${streak !== 1 ? 'en' : ''}. Goed gedaan!`,
     completionNothing: 'Geen kaartjes te herhalen vandaag! Kom morgen terug. 🎉',
   },
@@ -148,6 +151,7 @@ const UI_STRINGS = {
     practiceBtn:      'Jetzt üben',
     moreCards:        'Mehr Karten',
     homeBtn:          'Start',
+    skipBtn:          'Schon bekannt — überspringen',
     completionDone:    (streak) => `Sitzung abgeschlossen! Serie: ${streak} Tag${streak !== 1 ? 'e' : ''}. Gut gemacht!`,
     completionNothing: 'Keine Karten heute fällig! Komm morgen wieder. 🎉',
   },
@@ -192,6 +196,7 @@ const UI_STRINGS = {
     practiceBtn:      'Oefen nu',
     moreCards:        'Meer kaartjes',
     homeBtn:          'Begin',
+    skipBtn:          'Al bekend — overslaan',
     completionDone:    (streak) => `Sessie voltooid! Reeks: ${streak} dag${streak !== 1 ? 'en' : ''}. Goed gedaan!`,
     completionNothing: 'Geen kaartjes te herhalen vandaag! Kom morgen terug. 🎉',
   },
@@ -234,6 +239,15 @@ function loadStats() {
 
 function saveStats(stats) {
   localStorage.setItem(STORAGE_STATS, JSON.stringify(stats));
+}
+
+function loadSkipped() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_SKIPPED)) || []; }
+  catch { return []; }
+}
+
+function saveSkipped(skipped) {
+  localStorage.setItem(STORAGE_SKIPPED, JSON.stringify(skipped));
 }
 
 // ── SM-2 Algorithm ─────────────────────────────────────────────────────────
@@ -299,8 +313,10 @@ function checkAnswer(input, correct) {
 
 function buildSession(level) {
   const progress = loadProgress();
+  const skipped  = loadSkipped();
   const now = Date.now();
-  const levelCards = LANG_PAIR_CONFIG[state.mode].cards().filter(c => c.level === level);
+  const levelCards = LANG_PAIR_CONFIG[state.mode].cards()
+    .filter(c => c.level === level && !skipped.includes(c.id));
 
   const due = levelCards.filter(c => {
     const s = progress[c.id];
@@ -550,6 +566,21 @@ function rateCard(quality) {
   renderCard();
 }
 
+function skipCard() {
+  if (state.flipped) return;
+  const card = state.session[state.sessionIndex];
+  if (!card) return;
+
+  const skipped = loadSkipped();
+  if (!skipped.includes(card.id)) {
+    skipped.push(card.id);
+    saveSkipped(skipped);
+  }
+
+  state.sessionIndex++;
+  renderCard();
+}
+
 function endSession() {
   showCompletionModal(false);
 }
@@ -632,6 +663,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Check button
   document.getElementById('btn-check').addEventListener('click', submitAnswer);
+
+  // Skip button
+  document.getElementById('btn-skip').addEventListener('click', skipCard);
 
   // Speak button (front) — speaks the question word
   document.getElementById('btn-speak').addEventListener('click', () => {
