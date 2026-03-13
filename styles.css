@@ -590,4 +590,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   .card-catalan-word { font-size: 1.6rem; }
   .btn-next          { min-width: 140px; }
   .stats-overview    { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Give the card enough height so content never overflows the face */
+  .card-scene,
+  .card-inner { min-height: 360px; }
+  .card-face  { padding: 24px 20px; }
 }
