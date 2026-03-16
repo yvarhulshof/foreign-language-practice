@@ -64,8 +64,8 @@ const UI_STRINGS = {
     completionNothing: 'No hi ha targetes pendents per avui! Torna demà. 🎉',
     myWordsNav:        'Les Meves Paraules',
     myWordsTitle:      'Les Meves Paraules',
-    myWordsDesc:       'Escriu paraules en neerlandès (una per línia) per crear les teves pròpies targetes de memòria.',
-    myWordsTextareaPlaceholder: 'hond\nkat\nstoel\nauto\nhuis',
+    myWordsDesc:       'Escriu paraules en català (una per línia) per crear les teves pròpies targetes de memòria.',
+    myWordsTextareaPlaceholder: 'gat\ngos\ncadira\ncotxe\ncasa',
     myWordsSaveBtn:    'Tradueix i practica',
     myWordsPracticeBtn:'Practica les meves paraules',
     myWordsEditBtn:    'Edita la llista',
@@ -119,8 +119,8 @@ const UI_STRINGS = {
     completionNothing: 'Geen kaartjes te herhalen vandaag! Kom morgen terug. 🎉',
     myWordsNav:        'Mijn Woorden',
     myWordsTitle:      'Mijn Woorden',
-    myWordsDesc:       'Typ Catalaanse woorden (één per regel) om je eigen geheugenkaartjes te maken.',
-    myWordsTextareaPlaceholder: 'gat\ngos\ncadira\ncotxe\ncasa',
+    myWordsDesc:       'Schrijf Nederlandse woorden (één per regel) om je eigen geheugenkaartjes te maken.',
+    myWordsTextareaPlaceholder: 'hond\nkat\nstoel\nauto\nhuis',
     myWordsSaveBtn:    'Vertalen & oefenen',
     myWordsPracticeBtn:'Mijn woorden oefenen',
     myWordsEditBtn:    'Lijst bewerken',
@@ -174,8 +174,8 @@ const UI_STRINGS = {
     completionNothing: 'Keine Karten heute fällig! Komm morgen wieder. 🎉',
     myWordsNav:        'Meine Wörter',
     myWordsTitle:      'Meine Wörter',
-    myWordsDesc:       'Gib niederländische Wörter ein (eines pro Zeile), um eigene Lernkarten zu erstellen.',
-    myWordsTextareaPlaceholder: 'hond\nkat\nstoel\nauto\nhuis',
+    myWordsDesc:       'Gib deutsche Wörter ein (eines pro Zeile), um eigene Lernkarten zu erstellen.',
+    myWordsTextareaPlaceholder: 'Hund\nKatze\nStuhl\nAuto\nHaus',
     myWordsSaveBtn:    'Übersetzen & üben',
     myWordsPracticeBtn:'Meine Wörter üben',
     myWordsEditBtn:    'Liste bearbeiten',
@@ -229,8 +229,8 @@ const UI_STRINGS = {
     completionNothing: 'Geen kaartjes te herhalen vandaag! Kom morgen terug. 🎉',
     myWordsNav:        'Mijn Woorden',
     myWordsTitle:      'Mijn Woorden',
-    myWordsDesc:       'Typ Duitse woorden (één per regel) om je eigen geheugenkaartjes te maken.',
-    myWordsTextareaPlaceholder: 'Hund\nKatze\nStuhl\nAuto\nHaus',
+    myWordsDesc:       'Schrijf Nederlandse woorden (één per regel) om je eigen geheugenkaartjes te maken.',
+    myWordsTextareaPlaceholder: 'hond\nkat\nstoel\nauto\nhuis',
     myWordsSaveBtn:    'Vertalen & oefenen',
     myWordsPracticeBtn:'Mijn woorden oefenen',
     myWordsEditBtn:    'Lijst bewerken',
@@ -420,8 +420,8 @@ async function translateWord(word, srcLang, tgtLang) {
 
 async function processCustomWordList(rawText) {
   const cfg = LANG_PAIR_CONFIG[state.mode];
-  const srcLang = cfg.frontLang.split('-')[0];  // e.g. 'nl'
-  const tgtLang = cfg.backLang.split('-')[0];   // e.g. 'de'
+  const srcLang = cfg.backLang.split('-')[0];   // user enters back-language words
+  const tgtLang = cfg.frontLang.split('-')[0];  // translate to front language for prompts
 
   const words = [...new Set(
     rawText.split('\n').map(w => w.trim()).filter(w => w.length > 0)
@@ -453,8 +453,8 @@ async function processCustomWordList(rawText) {
     try {
       const translated = await translateWord(words[i], srcLang, tgtLang);
       const card = { id, level: 'custom', topic: s.myWordsTitle };
-      card[cfg.front] = words[i];
-      card[cfg.back]  = translated;
+      card[cfg.back]  = words[i];   // user input → answer side
+      card[cfg.front] = translated; // translation → prompt side
       newCards.push(card);
     } catch {
       failed.push(words[i]);
@@ -784,7 +784,7 @@ function showMyWordsEditor() {
   const existing = loadCustomWords()[state.mode] || [];
   // Pre-fill textarea with existing source words
   document.getElementById('my-words-textarea').value =
-    existing.map(c => c[cfg.front]).join('\n');
+    existing.map(c => c[cfg.back]).join('\n');
   document.getElementById('my-words-saved-info').classList.add('hidden');
   document.getElementById('my-words-textarea-section').classList.remove('hidden');
   document.getElementById('my-words-errors').classList.add('hidden');
