@@ -62,6 +62,17 @@ const UI_STRINGS = {
     homeBtn:          'Inici',
     completionDone:    (streak) => `Sessió completada! Ratxa: ${streak} dia${streak !== 1 ? 's' : ''}. Bon treball!`,
     completionNothing: 'No hi ha targetes pendents per avui! Torna demà. 🎉',
+    myWordsNav:        'Les Meves Paraules',
+    myWordsTitle:      'Les Meves Paraules',
+    myWordsDesc:       'Escriu paraules en neerlandès (una per línia) per crear les teves pròpies targetes de memòria.',
+    myWordsTextareaPlaceholder: 'hond\nkat\nstoel\nauto\nhuis',
+    myWordsSaveBtn:    'Tradueix i practica',
+    myWordsPracticeBtn:'Practica les meves paraules',
+    myWordsEditBtn:    'Edita la llista',
+    myWordsTranslating:(n, total) => `Traduint ${n} / ${total}…`,
+    myWordsCount:      (n) => `${n} paraula${n !== 1 ? 'es' : ''} desada${n !== 1 ? 'es' : ''}`,
+    myWordsErrors:     'No s\'han pogut traduir:',
+    myWordsEmpty:      'Escriu almenys una paraula per continuar.',
   },
   'ca-nl': {
     navFlag:          '🏴󠁥󠁳󠁣󠁴󠁿',
@@ -106,6 +117,17 @@ const UI_STRINGS = {
     homeBtn:          'Begin',
     completionDone:    (streak) => `Sessie voltooid! Reeks: ${streak} dag${streak !== 1 ? 'en' : ''}. Goed gedaan!`,
     completionNothing: 'Geen kaartjes te herhalen vandaag! Kom morgen terug. 🎉',
+    myWordsNav:        'Mijn Woorden',
+    myWordsTitle:      'Mijn Woorden',
+    myWordsDesc:       'Typ Catalaanse woorden (één per regel) om je eigen geheugenkaartjes te maken.',
+    myWordsTextareaPlaceholder: 'gat\ngos\ncadira\ncotxe\ncasa',
+    myWordsSaveBtn:    'Vertalen & oefenen',
+    myWordsPracticeBtn:'Mijn woorden oefenen',
+    myWordsEditBtn:    'Lijst bewerken',
+    myWordsTranslating:(n, total) => `Vertalen ${n} / ${total}…`,
+    myWordsCount:      (n) => `${n} woord${n !== 1 ? 'en' : ''} opgeslagen`,
+    myWordsErrors:     'Kon niet vertalen:',
+    myWordsEmpty:      'Voer minstens één woord in om door te gaan.',
   },
   'nl-de': {
     navFlag:          '🇩🇪',
@@ -150,6 +172,17 @@ const UI_STRINGS = {
     homeBtn:          'Start',
     completionDone:    (streak) => `Sitzung abgeschlossen! Serie: ${streak} Tag${streak !== 1 ? 'e' : ''}. Gut gemacht!`,
     completionNothing: 'Keine Karten heute fällig! Komm morgen wieder. 🎉',
+    myWordsNav:        'Meine Wörter',
+    myWordsTitle:      'Meine Wörter',
+    myWordsDesc:       'Gib niederländische Wörter ein (eines pro Zeile), um eigene Lernkarten zu erstellen.',
+    myWordsTextareaPlaceholder: 'hond\nkat\nstoel\nauto\nhuis',
+    myWordsSaveBtn:    'Übersetzen & üben',
+    myWordsPracticeBtn:'Meine Wörter üben',
+    myWordsEditBtn:    'Liste bearbeiten',
+    myWordsTranslating:(n, total) => `Übersetze ${n} / ${total}…`,
+    myWordsCount:      (n) => `${n} Wort${n !== 1 ? 'e' : ''} gespeichert`,
+    myWordsErrors:     'Konnte nicht übersetzen:',
+    myWordsEmpty:      'Gib mindestens ein Wort ein, um fortzufahren.',
   },
   'de-nl': {
     navFlag:          '🇳🇱',
@@ -194,6 +227,17 @@ const UI_STRINGS = {
     homeBtn:          'Begin',
     completionDone:    (streak) => `Sessie voltooid! Reeks: ${streak} dag${streak !== 1 ? 'en' : ''}. Goed gedaan!`,
     completionNothing: 'Geen kaartjes te herhalen vandaag! Kom morgen terug. 🎉',
+    myWordsNav:        'Mijn Woorden',
+    myWordsTitle:      'Mijn Woorden',
+    myWordsDesc:       'Typ Duitse woorden (één per regel) om je eigen geheugenkaartjes te maken.',
+    myWordsTextareaPlaceholder: 'Hund\nKatze\nStuhl\nAuto\nHaus',
+    myWordsSaveBtn:    'Vertalen & oefenen',
+    myWordsPracticeBtn:'Mijn woorden oefenen',
+    myWordsEditBtn:    'Lijst bewerken',
+    myWordsTranslating:(n, total) => `Vertalen ${n} / ${total}…`,
+    myWordsCount:      (n) => `${n} woord${n !== 1 ? 'en' : ''} opgeslagen`,
+    myWordsErrors:     'Kon niet vertalen:',
+    myWordsEmpty:      'Voer minstens één woord in om door te gaan.',
   },
 };
 
@@ -348,6 +392,120 @@ function getCardCounts(level) {
   return counts;
 }
 
+// ── Custom word list ───────────────────────────────────────────────────────
+
+const STORAGE_CUSTOM_WORDS = 'dc_custom_words';
+
+function loadCustomWords() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_CUSTOM_WORDS)) || {}; }
+  catch { return {}; }
+}
+
+function saveCustomWords(data) {
+  localStorage.setItem(STORAGE_CUSTOM_WORDS, JSON.stringify(data));
+}
+
+function customWordId(mode, sourceWord) {
+  return `custom_${mode}_${sourceWord.trim().toLowerCase().replace(/\s+/g, '_')}`;
+}
+
+async function translateWord(word, srcLang, tgtLang) {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=${srcLang}|${tgtLang}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('network');
+  const data = await res.json();
+  if (data.responseStatus !== 200) throw new Error(data.responseDetails || 'api');
+  return data.responseData.translatedText;
+}
+
+async function processCustomWordList(rawText) {
+  const cfg = LANG_PAIR_CONFIG[state.mode];
+  const srcLang = cfg.frontLang.split('-')[0];  // e.g. 'nl'
+  const tgtLang = cfg.backLang.split('-')[0];   // e.g. 'de'
+
+  const words = [...new Set(
+    rawText.split('\n').map(w => w.trim()).filter(w => w.length > 0)
+  )];
+
+  if (words.length === 0) return null;
+
+  const progressEl = document.getElementById('my-words-progress');
+  const saveBtn    = document.getElementById('btn-my-words-save');
+  saveBtn.disabled = true;
+
+  const all = loadCustomWords();
+  const existing = all[state.mode] || [];
+  // Build lookup for existing cards to preserve SRS progress data
+  const existingMap = Object.fromEntries(existing.map(c => [c.id, c]));
+
+  const newCards = [];
+  const failed   = [];
+  const s        = UI_STRINGS[state.mode];
+
+  for (let i = 0; i < words.length; i++) {
+    progressEl.textContent = s.myWordsTranslating(i + 1, words.length);
+    const id = customWordId(state.mode, words[i]);
+    // Reuse existing card (keeps translation + SRS progress)
+    if (existingMap[id]) {
+      newCards.push(existingMap[id]);
+      continue;
+    }
+    try {
+      const translated = await translateWord(words[i], srcLang, tgtLang);
+      const card = { id, level: 'custom', topic: s.myWordsTitle };
+      card[cfg.front] = words[i];
+      card[cfg.back]  = translated;
+      newCards.push(card);
+    } catch {
+      failed.push(words[i]);
+    }
+  }
+
+  progressEl.textContent = '';
+  saveBtn.disabled = false;
+
+  if (newCards.length === 0) return { newCards, failed };
+
+  all[state.mode] = newCards;
+  saveCustomWords(all);
+
+  // Show errors if any
+  const errEl = document.getElementById('my-words-errors');
+  if (failed.length > 0) {
+    errEl.textContent = `${s.myWordsErrors} ${failed.join(', ')}`;
+    errEl.classList.remove('hidden');
+  } else {
+    errEl.classList.add('hidden');
+  }
+
+  return { newCards, failed };
+}
+
+function buildCustomSession() {
+  const all      = loadCustomWords()[state.mode] || [];
+  const progress = loadProgress();
+  const now      = Date.now();
+
+  const due      = all.filter(c => progress[c.id] && progress[c.id].nextReview <= now);
+  const newCount = Math.max(0, NEW_CARDS_PER_SESSION - due.length);
+  const newCards = all.filter(c => !progress[c.id]).slice(0, newCount);
+
+  return shuffle([...due, ...newCards]);
+}
+
+function startCustomSession() {
+  state.session = buildCustomSession();
+  state.sessionIndex = 0;
+  state.customSession = true;
+
+  if (state.session.length === 0) {
+    showCompletionModal(true);
+    return;
+  }
+  showView('view-study');
+  renderCard();
+}
+
 // ── TTS ────────────────────────────────────────────────────────────────────
 
 let _ttsAudio = null;
@@ -384,6 +542,7 @@ const state = {
   flipped: false,
   lastResult: null,  // 'exact' | 'close' | 'wrong'
   mode: localStorage.getItem(STORAGE_MODE) || 'nl-ca',
+  customSession: false,
 };
 
 // ── View switching ─────────────────────────────────────────────────────────
@@ -411,6 +570,7 @@ function renderHome() {
 // ── Study view ─────────────────────────────────────────────────────────────
 
 function startSession() {
+  state.customSession = false;
   state.session = buildSession(state.currentLevel);
   state.sessionIndex = 0;
 
@@ -444,7 +604,8 @@ function renderCard() {
 
   // Front
   document.getElementById('card-front-word').textContent = frontWord;
-  document.getElementById('card-topic').textContent      = `${card.level} · ${card.topic}`;
+  document.getElementById('card-topic').textContent      =
+    card.level === 'custom' ? card.topic : `${card.level} · ${card.topic}`;
 
   // Blank back — prevents answer peek during flip-back animation.
   // Back content is populated in submitAnswer() just before flipping.
@@ -587,6 +748,48 @@ function renderStats() {
   }
 }
 
+// ── My Words view ──────────────────────────────────────────────────────────
+
+function renderMyWords() {
+  showView('view-my-words');
+  const s        = UI_STRINGS[state.mode];
+  const existing = loadCustomWords()[state.mode] || [];
+
+  document.getElementById('my-words-title').textContent        = s.myWordsTitle;
+  document.getElementById('my-words-desc').textContent         = s.myWordsDesc;
+  document.getElementById('btn-my-words-save').textContent     = s.myWordsSaveBtn;
+  document.getElementById('btn-my-words-practice').textContent = s.myWordsPracticeBtn;
+  document.getElementById('btn-my-words-edit').textContent     = s.myWordsEditBtn;
+  document.getElementById('my-words-textarea').placeholder     = s.myWordsTextareaPlaceholder;
+  document.getElementById('my-words-progress').textContent     = '';
+  document.getElementById('my-words-errors').classList.add('hidden');
+  document.getElementById('my-words-empty-msg').textContent    = s.myWordsEmpty;
+  document.getElementById('my-words-empty-msg').classList.add('hidden');
+
+  if (existing.length > 0) {
+    // Show saved state: count + practice/edit buttons; hide textarea + save btn
+    document.getElementById('my-words-count').textContent = s.myWordsCount(existing.length);
+    document.getElementById('my-words-saved-info').classList.remove('hidden');
+    document.getElementById('my-words-textarea-section').classList.add('hidden');
+  } else {
+    // Show textarea for input
+    document.getElementById('my-words-saved-info').classList.add('hidden');
+    document.getElementById('my-words-textarea-section').classList.remove('hidden');
+    document.getElementById('my-words-textarea').value = '';
+  }
+}
+
+function showMyWordsEditor() {
+  const cfg      = LANG_PAIR_CONFIG[state.mode];
+  const existing = loadCustomWords()[state.mode] || [];
+  // Pre-fill textarea with existing source words
+  document.getElementById('my-words-textarea').value =
+    existing.map(c => c[cfg.front]).join('\n');
+  document.getElementById('my-words-saved-info').classList.add('hidden');
+  document.getElementById('my-words-textarea-section').classList.remove('hidden');
+  document.getElementById('my-words-errors').classList.add('hidden');
+}
+
 // ── Event wiring ───────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -603,7 +806,12 @@ document.addEventListener('DOMContentLoaded', () => {
     );
     applyUI(newMode);
     document.getElementById('completion-overlay').classList.add('hidden');
-    renderHome();
+    // If My Words view is active, refresh it for the new mode; otherwise go home
+    if (!document.getElementById('view-my-words').classList.contains('hidden')) {
+      renderMyWords();
+    } else {
+      renderHome();
+    }
   });
 
   // Level selector
@@ -621,6 +829,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('nav-stats').addEventListener('click', renderStats);
   document.getElementById('nav-home').addEventListener('click', renderHome);
   document.getElementById('nav-home-study').addEventListener('click', renderHome);
+  document.getElementById('nav-my-words').addEventListener('click', renderMyWords);
+  document.getElementById('nav-home-my-words').addEventListener('click', renderHome);
 
   // Answer input: Enter submits (or advances if already flipped)
   document.getElementById('answer-input').addEventListener('keydown', e => {
@@ -657,15 +867,39 @@ document.addEventListener('DOMContentLoaded', () => {
   // Completion overlay
   document.getElementById('btn-continue-study').addEventListener('click', () => {
     document.getElementById('completion-overlay').classList.add('hidden');
-    startSession();
+    if (state.customSession) startCustomSession();
+    else startSession();
   });
   document.getElementById('btn-go-home').addEventListener('click', () => {
     document.getElementById('completion-overlay').classList.add('hidden');
-    renderHome();
+    if (state.customSession) renderMyWords();
+    else renderHome();
   });
 
   // Stats → practice
   document.getElementById('btn-stats-practice').addEventListener('click', startSession);
+
+  // My Words: save/translate button
+  document.getElementById('btn-my-words-save').addEventListener('click', async () => {
+    const rawText = document.getElementById('my-words-textarea').value;
+    const s = UI_STRINGS[state.mode];
+    const words = rawText.split('\n').map(w => w.trim()).filter(w => w.length > 0);
+    if (words.length === 0) {
+      document.getElementById('my-words-empty-msg').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('my-words-empty-msg').classList.add('hidden');
+    const result = await processCustomWordList(rawText);
+    if (result && result.newCards.length > 0) {
+      startCustomSession();
+    }
+  });
+
+  // My Words: practice saved words
+  document.getElementById('btn-my-words-practice').addEventListener('click', startCustomSession);
+
+  // My Words: edit list
+  document.getElementById('btn-my-words-edit').addEventListener('click', showMyWordsEditor);
 
   // Set initial mode toggle state
   document.querySelectorAll('.mode-btn').forEach(b =>
