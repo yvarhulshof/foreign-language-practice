@@ -757,6 +757,7 @@ function showCompletionModal(nothingDue) {
     msg.textContent = s.completionDone(stats.streak);
   }
   overlay.classList.remove('hidden');
+  new Audio('audio/interesting.mp3').play();
 }
 
 // ── Stats view ─────────────────────────────────────────────────────────────
