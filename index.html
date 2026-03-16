@@ -20,6 +20,16 @@
       <button class="mode-btn"        data-mode="nl-de">NL → DE</button>
       <button class="mode-btn"        data-mode="de-nl">DE → NL</button>
     </div>
+    <button class="nav-link" id="nav-my-words" aria-label="My Words">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+        <line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span data-i18n="myWordsNav">Les Meves Paraules</span>
+    </button>
     <button class="nav-link" id="nav-stats" aria-label="Estadístiques">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -318,6 +328,45 @@
       </div>
     </div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: My Words                                                 -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="view hidden" id="view-my-words">
+
+    <div class="study-header">
+      <button class="btn-ghost btn-back" id="nav-home-my-words" data-i18n="backBtn">← Inici</button>
+    </div>
+
+    <div class="home-card">
+      <h2 class="my-words-title" id="my-words-title">Les Meves Paraules</h2>
+      <p class="my-words-desc" id="my-words-desc"></p>
+
+      <!-- Textarea section (shown when no words saved, or editing) -->
+      <div id="my-words-textarea-section">
+        <textarea
+          id="my-words-textarea"
+          class="my-words-textarea"
+          rows="8"
+          autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+          placeholder="hond&#10;kat&#10;stoel"></textarea>
+        <p class="my-words-empty-msg hidden" id="my-words-empty-msg"></p>
+        <p class="my-words-progress" id="my-words-progress"></p>
+        <p class="my-words-errors hidden" id="my-words-errors"></p>
+        <button class="btn-primary" id="btn-my-words-save">Tradueix i practica</button>
+      </div>
+
+      <!-- Saved state (shown when words exist and not editing) -->
+      <div class="my-words-saved-info hidden" id="my-words-saved-info">
+        <p class="my-words-count" id="my-words-count"></p>
+        <div class="my-words-btn-row">
+          <button class="btn-primary" id="btn-my-words-practice">Practica les meves paraules</button>
+          <button class="btn-ghost" id="btn-my-words-edit">Edita la llista</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
 
   <script src="data.js"></script>
   <script src="app.js"></script>
